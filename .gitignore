@@ -1,0 +1,5 @@
+# .gitignore
+_main/params.json
+*.log
+_main/users/
+_main/telebot-387719-a4dee17e7f02.json
