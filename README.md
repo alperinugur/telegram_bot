@@ -119,6 +119,10 @@ This section will list the software and knowledge prerequisites for using this b
    
    https://www.ffmpeg.org/download.html
    
+   **or FASTER download**
+   
+   https://github.com/GyanD/codexffmpeg/releases/download/6.0/ffmpeg-6.0-essentials_build.zip
+   
    Once downloaded, extract the zip files into a folder (I prefer C:\Program Files\ffmpeg-6.0-essentials_build)
    
    Add the bin directory to your PATH environment form the windows "Edit the System Environment":
