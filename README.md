@@ -179,7 +179,7 @@ This section will list the software and knowledge prerequisites for using this b
    The authentication JSON file created there will have a name like 'mybots-325452-ad7e3ab28d2a.json'
    Save this file in the _main subfolder, and change the placement in the _main/params file.
 
-   If you are familiar with Google Cloud services, use the following link to create a Service Account:7
+   If you are familiar with Google Cloud services, use the following link to create a Service Account:
    
    https://console.cloud.google.com/iam-admin/serviceaccounts/details/
    
