@@ -311,7 +311,7 @@ async def voice_handler(chat: Chat, voice):
 #region Helper routines
 
 def sendHelpScreen(chat:Chat,Turkce = False):
-    fname = "helptext.txt"
+    fname = "_main/helptext.txt"
     if Turkce:
         fname = "_main/yardimtext.txt"
     with open(fname, 'r',encoding='utf-8') as file:
