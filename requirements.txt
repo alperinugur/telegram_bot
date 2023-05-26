@@ -1,0 +1,15 @@
+# run this command to install all packages: pip install -r requirements.txt
+
+python-telegram-bot==13.0
+openai
+moviepy
+aiohttp
+aiotg
+boto3
+opencv-python-headless
+Pillow
+playsound
+pydub
+google-cloud-vision
+pandas
+requests
