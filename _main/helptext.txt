@@ -1,0 +1,25 @@
+I am an AI bot making use of the famous chatGPT
+
+Here are some commands you can use:
+
+/help   -> this help screen
+/yardim -> Türkçe yardım ekranı
+/new    -> type this to clean my memory about previous chats with you
+/bot    -> see the current available bot types and their languages
+/bot #  -> select a new bot to talk to (this also cleans my previous chats)
+
+/weather city -> get weather information of a city
+
+/image  -> when you type this, I will try to generate a picture about what we talked before
+
+/image prompt1 prompt2 ..... -> I will generate an image depending on your prompts
+
+Example:  /image a beautiful sunset in istanbul, bosphorus
+
+/image --st##  -> works like the image command, but you can increase quality. (max:25)
+
+Example:  /image a beautiful sunset in istanbul, bosphorus --st25
+
+You can just type anything to talk to me.
+
+Also you can send me voice messages, if you want a voice answer from me.

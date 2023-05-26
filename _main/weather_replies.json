@@ -1,0 +1,36 @@
+{  "weather": [
+    {
+		"id": 1,
+		"language": "English",
+		"lancode": "en-US",
+		
+		"errCon": "Error getting weather info for",
+		"errcity": "For which city? \n\nUsage example:   /weather London ",
+		"errUnkn": "You sure about the city name? That's not on my list..",
+		"curw": "Current weather status in  ",
+		"temp": "Temperature: ",
+		"feel": "Feels like         : ",
+		"stat": "Status              : ",
+		"wind": "Wind                : ",
+		"unit": " kmph"
+  
+	  },
+	  {
+		"id": 2,
+		"language": "Turkish",
+		"lancode": "tr-TR",
+		
+		"errCon": "Bu şehir için hava durumu alamadım: ",
+		"errcity": "Hangi şehir için hava durumu istediniz? \n\nKullanım şekli:    /hava istanbul",
+		"errUnkn": "Şehir isminden emin misiniz? Ben bulamadım, pardon..",
+		"curw": "Hava durumu raporu  - ",
+		"temp": "Sıcaklık     : ",
+		"feel": "Hissedilen : ",
+		"stat": "Durum       : ",
+		"wind": "Rüzgar hızı: ",
+		"unit": " km/saat"
+  
+	  }
+	
+  ]
+}

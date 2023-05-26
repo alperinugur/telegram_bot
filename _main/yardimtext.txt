@@ -1,0 +1,34 @@
+Ben ünlü chatGPT'yi kullanan bir Yapay Zeka bot'uyum.
+
+Kullanabileceğiniz bazı komutlar şunlardır:
+
+/yardim -> Bu yardım ekranı 
+/help   -> Help screen in English
+
+/new -> Önceki sohbetlerimizi untumak için bunu yazın. Bazen sil baştan yapmalıdır.
+
+/bot -> Mevcut bot türlerini ve dillerini görüntüleyin
+/bot # -> Yeni bir bot seçmek için yazın (bu da önceki sohbetlerimi siler)
+
+Yeni bot seçmek için örneğin    /bot 10    yazabilirsiniz
+
+
+/hava şehir adı ->  havdurumunu alır 
+
+/image -> Bu komutu yazdığınızda, önceden konuştuğumuz konuya göre bir resim oluşturmaya çalışacağım.
+
+/image prompt1 prompt2 ..... -> Komutlarınıza göre bir resim oluşturacağım.
+
+Örnek: /image İstanbul'da güzel bir günbatımı, Boğaziçi
+
+/image --st## -> İmaj komutuna benzer şekilde çalışır, ancak kaliteyi artırabilirsiniz. (max:25)
+
+Örnek: /image İstanbul'da güzel bir günbatımı, Boğaziçi --st25
+
+Benimle konuşmak için sadece herhangi bir şey yazabilirsiniz.
+
+Ayrıca bana sesli mesajlar gönderebilirsiniz, böylece size sesli bir yanıt verebilirim.
+
+
+
+
