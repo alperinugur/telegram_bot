@@ -157,7 +157,6 @@ This section will list the software and knowledge prerequisites for using this b
   or faster:
    Just run the Batch file named: AsyncBot.bat by double clicking its icon.
 
-10.**ACTIVATING BOT LATER**
 
    
 ## OPTIONAL FEATURES
