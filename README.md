@@ -85,6 +85,9 @@ This section will list the software and knowledge prerequisites for using this b
 
 7. **Install Telegram API Certificate**
    
+   **ACTUALLY I AM NOT SURE IF THIS IS NEEDED.!!**
+   
+   
    Go to webpage https://core.telegram.org/bots
    If you are using Chrome:
       Press the Lock key near the web-page
