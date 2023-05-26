@@ -42,7 +42,7 @@ This section will list the software and knowledge prerequisites for using this b
    Run the following command in the terminal to clone this repository:
    
    ```bash
-   git clone https://github.com/alperinugur/com/alperinugur/telegram_bot.git
+   git clone https://github.com/alperinugur/telegram_bot.git
    
 2. **Navigate to the cloned repository**
 
