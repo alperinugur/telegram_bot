@@ -91,25 +91,25 @@ This section will list the software and knowledge prerequisites for using this b
       
       Press the "Connection is Secure"
       
-      ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/8e0bab0b-b41b-49b0-bcd3-bc558d55eb20)
+      ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/fd620afa-a028-43c1-a443-237c2e18fe85)
 
       Press the "Certificate is Valid" and go to Details:
       
-      ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/1b5f7e1e-2306-41b4-9a89-8f12378fd526)
+      ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/d4949aa9-6f6b-4b37-9930-d1f70688d1b2)
 
       You need to export the key (certificate)
-      
-      ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/a1982392-2bd0-4ae0-a404-7bbf4ddd7988)
+     
+      ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/9ddeca25-78dc-4842-88db-e08269bc5315)
 
       And then, install the certificate:
       
-      ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/95aeb2e2-4601-4f35-b5db-aa9134dbb36d)
+      ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/de91ddb7-8240-4ba2-bdc7-b48079cda601)
 
       Select Current User (for only you on the computer) or Local Machine (for all users)
       
       and place all certificates on the "Trusted Root Certification Authorities":
       
-      ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/a1fd308b-ec15-4f64-9251-ff46f4587841)
+      ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/669b43b8-742d-45fa-9d9a-c2de38b53907)
 
       Press Finish!
       
@@ -123,24 +123,24 @@ This section will list the software and knowledge prerequisites for using this b
    
    Add the bin directory to your PATH environment form the windows "Edit the System Environment":
    
-   ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/0fba9bbe-45b5-4442-9169-0252e88f94f3)
+   ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/16567544-87b0-4ef4-916f-a16a7d7bec55)
 
    Select "Environment Variables" on the bottom of the page:
    
-   ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/a0de9f30-aadf-487f-b498-bfd3e7331cd7)
+   ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/daf1513c-dd0e-4554-8f2b-73f8bc30ad8c)
 
    Find Path in the System Variblaes and click Edit:
    
-   ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/f2f84d6b-8a28-40fd-a79f-4d125753d82a)
+   ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/fbd6e44f-b2fb-4b29-9611-b811296f85be)
 
    Press "New" on the right:
    
-   ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/fd6d6e6c-863c-4d40-8acd-364c71d66b3a)
+   ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/918cbf9c-f8e4-41f5-99b8-b13adecf9c03)
 
    **And insert your path (don't forget the last part /bin)**
    
-   ![image](https://github.com/alperinugur/FunnyBot-ChatGPT-Telegram/assets/30839536/f652fb92-307e-4019-8629-327000e20e76)
-
+   ![image](https://github.com/alperinugur/telegram_bot/assets/30839536/fe8d06f4-d796-4efc-b241-f9ed516ca1b6)
+   
    Click OK - OK - OK 
    
    
