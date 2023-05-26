@@ -1,4 +1,4 @@
-# FunnyBot-ChatGPT-Telegram
+# telegram_bot
 
 A Telegram bot using ChatGPT to answer any question.
 The code is working in async mode.
