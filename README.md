@@ -145,6 +145,7 @@ This section will list the software and knowledge prerequisites for using this b
    
    
 9. **Run the bot**
+
    Now you can run the bot:
    ```bash
    C:
