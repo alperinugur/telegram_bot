@@ -1,6 +1,6 @@
 {
 	"admin_telegram_user_name" : "YOUR_TELEGRAM_USERNAME",
-	"admin_telegram_user_id" : 111111111,
+	"admin_telegram_user_id" : 22222222,
 	"openai_api_key": "Your API Key of OPEN AI",	
 	"openai_organization": "your organizations API Key from OPEN AI",
 	"telegram_api_key": "Your telegram API key",
