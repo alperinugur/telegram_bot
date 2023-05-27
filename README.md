@@ -22,6 +22,11 @@ Some features are:
    
    https://t.me/FunnyAndDumb_bot
 
+   If you want to see the screenshots of the user please see below link:
+   
+   https://www.youtube.com/watch?v=Kah6sd6i67Y
+     
+     
 **The code has been tested only on Windows Environment**
 
 ## Prerequisites
@@ -36,7 +41,10 @@ This section will list the software and knowledge prerequisites for using this b
 
 ## Installation & Setup
 
-**For a very detailed youtube video:**
+**For a very detailed youtube video of setup, follow the below link:**
+   
+   It includes everything to setup:
+  
    https://www.youtube.com/watch?v=veozSu0oPbk
 
 1. **Clone the repository**
