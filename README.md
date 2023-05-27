@@ -36,6 +36,8 @@ This section will list the software and knowledge prerequisites for using this b
 
 ## Installation & Setup
 
+**For a very detailed youtube video:**
+   https://www.youtube.com/watch?v=veozSu0oPbk
 
 1. **Clone the repository**
 
