@@ -201,3 +201,20 @@ This section will list the software and knowledge prerequisites for using this b
    https://console.cloud.google.com/iam-admin/serviceaccounts/details/
    
   
+## Contributing
+
+   Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## Licencing
+
+   [MIT](https://choosealicense.com/licenses/mit/) 
+
+## Contact
+
+Akoer Inugur - [GitHub Profile](https://github.com/alperinugur)
+
+Project Link: [This project's main page.](https://github.com/alperinugur)
+
+
+   
+
