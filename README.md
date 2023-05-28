@@ -213,7 +213,7 @@ This section will list the software and knowledge prerequisites for using this b
 
 Akoer Inugur - [GitHub Profile](https://github.com/alperinugur)
 
-Project Link: [This project's main page.](https://github.com/alperinugur)
+Project Link: [This project's main page.](https://github.com/alperinugur/telegram_bot)
 
 
    
