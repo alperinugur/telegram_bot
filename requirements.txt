@@ -13,3 +13,4 @@ pydub
 google-cloud-vision
 pandas
 requests
+emoji
