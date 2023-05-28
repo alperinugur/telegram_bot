@@ -28,6 +28,7 @@ from google.cloud import vision
 import pandas as pd
 import re
 import ctypes
+import emoji
 
 #endregion
 
@@ -271,7 +272,21 @@ async def tele_photo(chat:Chat,photo):
     #chat.send_text(text=f"Picture? Why??")
     makelog(chat,f'Users Picture Saved: Pic_{time}.jpg',True)
 
+@bot.handle("sticker")                      # Handle the stickers
+async def sticker_handle(chat:Chat,sticker):
+    time = datetime.datetime.now().strftime("%y-%m-%d_%H_%M_%S")
+    user_name = getUserName(chat)
+    user_id = chat.sender["id"]
+    myemoji = (sticker["emoji"])
+    myemojidesc = (describe_emoji (myemoji))
+    chat.send_text (myemoji)
+    makelog(chat,f"Emoji: {myemoji} {myemojidesc}", False)
+    getusermessages (chat,"user", f"{myemoji} {myemojidesc}" )
+    makelog(chat,f"Emoji: {myemoji} {myemojidesc}",True)
+    getusermessages (chat,"assistant",f"{myemoji} {myemojidesc}" )
 
+	
+	
 @bot.handle("voice")                        # VOICE COMMANDS
 async def voice_handler(chat: Chat, voice):
     file_id = voice["file_id"]
@@ -317,6 +332,9 @@ def sendHelpScreen(chat:Chat,Turkce = False):
     with open(fname, 'r',encoding='utf-8') as file:
         helptext = file.read()
     chat.send_text(helptext)
+
+def describe_emoji(e):
+    return (emoji.demojize(e).strip(":").replace('_', ' '))
 
 async def reply_with_voice (chat: Chat,inputtxt):
     try:
