@@ -613,16 +613,13 @@ async def teleVoiceFileToTxt(chat,file_url):
         #n1,n2,n3,Botlanguage,n5,n6,n7,n8,ntemp , ntemp6= await GetBotProps(chat)
         BotPrps = await GetBotProps(chat)
         Botlanguage = BotPrps[3]
-        print (f"Bot Lang A1: {Botlanguage}")
+        #print (f"Bot Lang A1: {Botlanguage}")
     except:
         Botlanguage = "tr-TR"
         #print (f"Bot Lang: {Botlanguage}")
 
     audio_file = open(mp3_filename, "rb")
-    if Botlanguage == "en-US":
-        transcript = openai.Audio.translate("whisper-1", audio_file, f"language={Botlanguage}").text
-    else:
-        transcript = openai.Audio.transcribe("whisper-1", audio_file, f"language={Botlanguage}").text
+    transcript = openai.Audio.transcribe("whisper-1", audio_file).text
     return(transcript)
 
 async def download_file(url, local_filename):
