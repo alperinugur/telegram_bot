@@ -8,6 +8,10 @@ __pycache__/
 
 *.json
 _main/params.json
+_main/telebot*.json
+_main/users/
+venv/
+
 
 # Distribution / packaging
 .Python
