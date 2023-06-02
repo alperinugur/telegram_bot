@@ -31,7 +31,7 @@ import emoji
 from aiohttp import web
 import re
 import atexit
-# import google_voice_list
+import ctypes
 
 #endregion
 
@@ -139,7 +139,7 @@ async def LockPC(chat: Chat, match):
     user_id = chat.sender["id"]
     if checkAuth(chat,match):
         makelog (chat,f"{user_id} - LOCK PC command from admin. Processing.",True)
-        pc_command.PC_lock()
+        ctypes.windll.user32.LockWorkStation()
 
 @bot.command(r"^/shutdown")                     # /shutdown the pc verilirse
 async def LockPC(chat: Chat, match):
@@ -148,7 +148,7 @@ async def LockPC(chat: Chat, match):
         makelog (chat,f"{user_id} - SHUTDOWN command from admin. Processing.",True)
         os.system("shutdown /s /t 1")
 
-@bot.command(r"^/restart")                     # /lock the pc verilirse
+@bot.command(r"^/(restart|reboot)$")                     # /lock the pc verilirse
 async def LockPC(chat: Chat, match):
     user_id = chat.sender["id"]
     if checkAuth(chat,match):
@@ -329,9 +329,9 @@ def describe_emoji(e):
     return (emoji.demojize(e).strip(":").replace('_', ' '))
 
 def sendHelpScreen(chat:Chat,Turkce = False):
-    fname = "helptext.txt"
+    fname = "_main/helptext.txt"
     if Turkce:
-        fname = "yardimtext.txt"
+        fname = "_main/yardimtext.txt"
     with open(fname, 'r',encoding='utf-8') as file:
         helptext = file.read()
     chat.send_text(helptext)
@@ -1015,6 +1015,10 @@ def parse_block2(block):
     #print (f"Deneme Str: {denemestr}")
     return denemestr
 
+def send_Startup_message(user_id, message="Hello!"):
+    chat = Chat(bot, user_id)
+    chat.send_text(message)
+
 #endregion
 
 #region Response Online Status to Amazon
@@ -1033,11 +1037,8 @@ async def delhook():
     return(myres)
 
 async def handle(request):
-    await delhook()                     #Not Working
+    await delhook()                     
     return web.Response(text="OK")
-
-app = web.Application()
-app.router.add_get('/', handle)
 
 async def start_server():
     print (await delhook())
@@ -1046,8 +1047,6 @@ async def start_server():
     site = web.TCPSite(runner, '0.0.0.0', 9988)  # 
     await site.start()
 
-#endregion
-
 def sethook():
     response = requests.post(
         f'https://api.telegram.org/bot{API_KEY}/setWebhook',
@@ -1055,17 +1054,18 @@ def sethook():
     )       
     print (response.content)
 
-def send_Startup_message(user_id, message="Hello!"):
-    chat = Chat(bot, user_id)
-    chat.send_text(message)
-
 def cleanup():
     # Your cleanup code or any other function you want to run
     print("Adding WebHook to Telegram...")
     try:
         sethook()
-    except:
-        a1 = 1
+    except Exception as e:
+        print (e)
+
+app = web.Application()
+app.router.add_get('/', handle)
+
+#endregion
 
 atexit.register(cleanup)
 
