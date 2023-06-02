@@ -20,31 +20,33 @@ import subprocess
 import asyncio
 import boto3
 import winsound
+import pc_command
 import requests
 import json
 from PIL import Image
 from io import BytesIO
-from google.cloud import vision
+from google.cloud import vision, texttospeech
 import pandas as pd
 import re
-import ctypes
 import emoji
+from aiohttp import web
+import re
+import atexit
+# import google_voice_list
 
 #endregion
 
-#region Parameters
+# region Parameters
 
-# Access the parameter values
 params= {}
-
 def Get_Parameters():
     global params
-    global openai, API_KEY, AMZ_aws_access_key_id, AMZ_aws_secret_access_key
+    global openai, API_KEY
     global DefaultTempForGPT, DefaultTempImageGPT, DefaultImageSteps, LogTextNameFixLength
     global GenImageReplyText, ImageGeneratorURL, ImageGeneratorAddress, ImageGenSystemRoleText
     global ImageGenUserRoleText, ImageGenUserRoleTextRandom, ImageGenDefault, ImageGenSkipThese
     global automatic1111_path, automatic1111_starter, async_bot_path, GOOGLE_APPLICATION_CREDENTIALS
-    global ChatGPTErrorReply
+    global ChatGPTErrorReply, weather_api_key
 
     # Read parameters from JSON
     with open('_main/params.json', 'r') as f:
@@ -54,8 +56,7 @@ def Get_Parameters():
         openai.api_key = paramsNew['openai_api_key']
         openai.organization = paramsNew['openai_organization']
         API_KEY = paramsNew['telegram_api_key']
-        AMZ_aws_access_key_id = paramsNew['amz_aws_access_key_id']
-        AMZ_aws_secret_access_key = paramsNew['amz_aws_secret_access_key']
+        weather_api_key = paramsNew['weather_api_key']
         DefaultTempForGPT = paramsNew['default_temp_for_gpt']
         DefaultTempImageGPT = paramsNew['default_temp_image_gpt']
         DefaultImageSteps = paramsNew['default_image_steps']
@@ -73,13 +74,15 @@ def Get_Parameters():
         automatic1111_starter = paramsNew['automatic1111_starter']
         async_bot_path = paramsNew['async_bot_path']
         GOOGLE_APPLICATION_CREDENTIALS = paramsNew['GOOGLE_APPLICATION_CREDENTIALS']
-
 Get_Parameters()
 
-#endregion
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
 bot = Bot(api_token=API_KEY)
+
+# google_voice_list.list_voices()
+
+#endregion
 
 #region Telegram Handled Inputs
 
@@ -135,7 +138,7 @@ async def LockPC(chat: Chat, match):
     user_id = chat.sender["id"]
     if checkAuth(chat,match):
         makelog (chat,f"{user_id} - LOCK PC command from admin. Processing.",True)
-        ctypes.windll.user32.LockWorkStation()
+        pc_command.PC_lock()
 
 @bot.command(r"^/shutdown")                     # /shutdown the pc verilirse
 async def LockPC(chat: Chat, match):
@@ -220,13 +223,10 @@ async def select_bot(chat: Chat, match):
             curbot= ""
         chat.send_text (f"Please Select from below modes\n {therep} \nExample: /bot 6 \n\n{curbot}")
 
-
-
-
 @bot.command(r"^/(.+)")                      # / ile başlayan anlamsız komutlara cevap
 async def unknown(chat:Chat,match):
     await chat.reply ("No such command.")
-    with open('_main/helptext.txt', 'r') as file:
+    with open('helptext.txt', 'r') as file:
         helptext = file.read()
     await chat.send_text(helptext)
     makelog(chat,f'Unknown Command Tried: {match}',True)
@@ -240,37 +240,37 @@ async def text_input(chat: Chat, match):
 
 @bot.handle("photo")                        # fotoğraf yüklenirse
 async def tele_photo(chat:Chat,photo):
-    time = datetime.datetime.now().strftime("%y-%m-%d_%H_%M_%S")
-
-    file_id = photo[-1]["file_id"]
-    file_info = await bot.api_call("getFile", file_id=file_id)
-    file_path = file_info["result"]["file_path"]
-    file_url = f"https://api.telegram.org/file/bot{API_KEY}/{file_path}"
-
-    saved_file_name = f'{getdir(chat,"pictures")}/Pic_{time}.jpg'
-
-    #download the picture from the fileurl
-    async with aiohttp.ClientSession() as session:
-        async with session.get(file_url) as resp:
-            with open(saved_file_name, "wb") as f:
-                while True:
-                    chunk = await resp.content.read(1024)  # read 1024 bytes
-                    if not chunk:
-                        # we are done reading the file
-                        break
-                    f.write(chunk)
-
     try:
+        time = datetime.datetime.now().strftime("%y-%m-%d_%H_%M_%S")
+
+        file_id = photo[-1]["file_id"]
+        file_info = await bot.api_call("getFile", file_id=file_id)
+        file_path = file_info["result"]["file_path"]
+        file_url = f"https://api.telegram.org/file/bot{API_KEY}/{file_path}"
+
+        saved_file_name = f'{getdir(chat,"pictures")}/Pic_{time}.jpg'
+
+        #download the picture from the fileurl
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as resp:
+                with open(saved_file_name, "wb") as f:
+                    while True:
+                        chunk = await resp.content.read(1024)  # read 1024 bytes
+                        if not chunk:
+                            # we are done reading the file
+                            break
+                        f.write(chunk)
+
         whatisinimage = Interrogate_Image(saved_file_name)[0:1000]
 
         imageContains= await chatGPTimageResult(chat, whatisinimage)
         chat.send_text(text=imageContains)
         makelog(chat,f'Image Contains: \n\n{imageContains}',True)
+        makelog(chat,f'Users Picture Saved: Pic_{time}.jpg',True)
     except:
         chat.send_text(text = 'Thanks for the picture!')
 
     #chat.send_text(text=f"Picture? Why??")
-    makelog(chat,f'Users Picture Saved: Pic_{time}.jpg',True)
 
 @bot.handle("sticker")                      # Handle the stickers
 async def sticker_handle(chat:Chat,sticker):
@@ -285,8 +285,6 @@ async def sticker_handle(chat:Chat,sticker):
     makelog(chat,f"Emoji: {myemoji} {myemojidesc}",True)
     getusermessages (chat,"assistant",f"{myemoji} {myemojidesc}" )
 
-	
-	
 @bot.handle("voice")                        # VOICE COMMANDS
 async def voice_handler(chat: Chat, voice):
     file_id = voice["file_id"]
@@ -308,71 +306,102 @@ async def voice_handler(chat: Chat, voice):
             await chat.send_text(f'You: {theText}')
 
         answer = await chatGPT(chat,theText)
-        replyfile = await reply_with_voice (chat, answer)
-        
+
         await chat.send_text(answer)
 
-        #print(answer)
+        try:
+            replyfile = await reply_with_voice (chat, answer)
 
-        if replyfile is not None:
-            with open(replyfile, "rb") as file:
-                print('replying')
-                await chat.send_audio(file)
-            file.close()
-            os.remove(replyfile)
-
+            if replyfile is not None:
+                with open(replyfile, "rb") as file:
+                    print('replying')
+                    await chat.send_audio(file)
+                file.close()
+                os.remove(replyfile)
+        except Exception as e:
+            print (e)
 #endregion
 
 #region Helper routines
 
+def describe_emoji(e):
+    return (emoji.demojize(e).strip(":").replace('_', ' '))
+
 def sendHelpScreen(chat:Chat,Turkce = False):
-    fname = "_main/helptext.txt"
+    fname = "helptext.txt"
     if Turkce:
-        fname = "_main/yardimtext.txt"
+        fname = "yardimtext.txt"
     with open(fname, 'r',encoding='utf-8') as file:
         helptext = file.read()
     chat.send_text(helptext)
 
-def describe_emoji(e):
-    return (emoji.demojize(e).strip(":").replace('_', ' '))
-
 async def reply_with_voice (chat: Chat,inputtxt):
-    try:
-        BotPrps = await GetBotProps(chat)
-        langname = BotPrps[2]
-        gender= BotPrps[4]
-        if langname == 'Turkish':
-            response = await synt_speech (inputtxt, '120%','Filiz','standard')  
-        elif langname == 'Hindi':
-            response = await synt_speech (inputtxt,'110%','Kajal','neural')
-        else:
-            if gender == 'female':
-                response = await synt_speech (inputtxt,'120%','Salli','neural')
-            else:
-                response = await synt_speech (inputtxt,'120%','Joey','neural')
-        
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        thefolder= getdir(chat,'temp')
-        thefile = thefolder + "/" +timestamp + '.mp3'
 
-        with open(thefile, 'wb') as f:
-            f.write(response['AudioStream'].read())
-        return (thefile)
-    except:
-        return None 
+    BotPrps = await GetBotProps(chat)
+    langname = BotPrps[2]
+    gender= BotPrps[4]
+    googleVoiceName = BotPrps[9]
+
+    mylan= "en-US"
+    if langname == 'Turkish':
+        mylan = "tr-TR"
+    elif langname == 'Hindi':
+        mylan= "hi-IN"
+    else:
+        mylan = "en-US"
+
+
+    VoiceGet = await google_synth_speech (Language = mylan,Gender = gender, text_to_talk= inputtxt, GoogleVName= googleVoiceName) 
+    # The response's audio_content is binary.
+
+
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    thefolder= getdir(chat,'temp')
+    thefile = thefolder + "/" +timestamp + '.mp3'
+
+    with open(thefile, "wb") as out:
+        # Write the response to the output file.
+        out.write(VoiceGet.audio_content)
+        # print('Audio content written to file "output.mp3"')
+    return (thefile)
+
+async def google_synth_speech(Language ="en-US", Gender ="neutral", text_to_talk = "Hello there.." , GoogleVName="en-US-Standard-B"):
+
+    client = texttospeech.TextToSpeechClient()
+
+    mpitch = "default"
+
+    # Set the SSML text input to be synthesized
+
+    # Mapping input string gender to the proper Enum value
+    if Gender.lower() == "male":
+        ssml_gender = texttospeech.SsmlVoiceGender.MALE
+    elif Gender.lower() == "female":
+        ssml_gender = texttospeech.SsmlVoiceGender.FEMALE
+    else:
+        ssml_gender = texttospeech.SsmlVoiceGender.NEUTRAL
+        mpitch = "high"
     
-async def synt_speech (TheText,rate,VId,Vengine):
-    #print (TheText,rate, VId,Vengine,AMZ_aws_access_key_id,AMZ_aws_secret_access_key)
-    thevoice = boto3.client('polly', region_name='us-west-2',aws_access_key_id=AMZ_aws_access_key_id, aws_secret_access_key=AMZ_aws_secret_access_key)
-    #print(f"<speak><prosody rate='{rate}'>{TheText}</prosody></speak>")
-    response = thevoice.synthesize_speech(
-        Text=f"<speak><prosody rate='{rate}'>{TheText}</prosody></speak>",
-        OutputFormat='mp3',
-        VoiceId=VId,
-        TextType = "ssml", 
-        Engine=Vengine
-        )
-    return response
+    synthesis_input = texttospeech.SynthesisInput(ssml=f'<speak><prosody rate="medium" pitch="{mpitch}">{text_to_talk}</prosody></speak>')
+
+    # Build the voice request
+    voice = texttospeech.VoiceSelectionParams(
+        language_code=Language.lower(),
+        name=GoogleVName,
+        ssml_gender=ssml_gender)
+
+    # Select the type of audio file you want returned
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3)
+
+    # Perform the text-to-speech request on the text input with the selected
+    # voice parameters and audio file type
+    response = client.synthesize_speech(
+        input=synthesis_input,
+        voice=voice,
+        audio_config=audio_config)
+
+    return (response)
 
 async def ClearChatContents (chat: Chat):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -580,18 +609,19 @@ async def teleVoiceFileToTxt(chat,file_url):
     Botlanguage="tr-TR"
 
     try:
-        n1,n2,n3,Botlanguage,n5,n6,n7,n8,ntemp = await GetBotProps(chat)
-        #print (f"Bot Lang: {Botlanguage}")
+        #n1,n2,n3,Botlanguage,n5,n6,n7,n8,ntemp , ntemp6= await GetBotProps(chat)
+        BotPrps = await GetBotProps(chat)
+        Botlanguage = BotPrps[3]
+        print (f"Bot Lang A1: {Botlanguage}")
     except:
         Botlanguage = "tr-TR"
         #print (f"Bot Lang: {Botlanguage}")
 
     audio_file = open(mp3_filename, "rb")
-    #if Botlanguage == "en-US":
-    #    transcript = openai.Audio.translate("whisper-1", audio_file, f"language={Botlanguage}").text
-    #else:
-    #    transcript = openai.Audio.transcribe("whisper-1", audio_file, f"language={Botlanguage}").text
-    transcript = openai.Audio.transcribe("whisper-1", audio_file).text
+    if Botlanguage == "en-US":
+        transcript = openai.Audio.translate("whisper-1", audio_file, f"language={Botlanguage}").text
+    else:
+        transcript = openai.Audio.transcribe("whisper-1", audio_file, f"language={Botlanguage}").text
     return(transcript)
 
 async def download_file(url, local_filename):
@@ -623,6 +653,7 @@ async def chatGPT(chat: Chat, prompt):
             max_tokens=1500,
             temperature = botTemp
         )
+        print(str(combined))
         ChatGPT_reply = response["choices"][0]["message"]["content"]
         ln1,ln2,ln3 = response["usage"]["prompt_tokens"],response["usage"]["completion_tokens"],response["usage"]["total_tokens"]
         tokeninfo = f" - [Tokens: {ln1}-{ln2}-{ln3}]"
@@ -647,9 +678,8 @@ async def chatGPTimageResult(chat:Chat, prompt):
     Get_Parameters()
     user_name = getUserName(chat)
 
-
     myTable = VisionToTable(prompt)
-    print (f"\n\nMY TABLE\n\n:{myTable}")
+    print (f"\n\nMY TABLE:\n\n{myTable}")
     imageReqLine = [{
         "role": "system", 
         "content": "You are a predictor which analysis text contents about a picture and sends back the best possible results. You give prompt answers and you do not mention about the table given to you. You just type in what you understand from the input material"
@@ -688,7 +718,6 @@ async def chatGPTimageResult(chat:Chat, prompt):
         makelog (chat,"ChatGPT raised Error",True)
         DeleteLast(chat)
         return (ChatGPTErrorReply)
-
 
 def DeleteLast(chat):
     try:
@@ -772,7 +801,6 @@ def getusermessages (chat: Chat,role,new_message):
     #print (f"Combined Returned: {combined}")    
     return(botmode,conversation,z)
 
-
 def botsLanguage(update):
     mylang = "English"
     try:
@@ -781,7 +809,6 @@ def botsLanguage(update):
     except:
         mylang = "English"
     return (mylang)
-
 
 def thisusersBot(update,newbot = None):
     if newbot is not None:
@@ -847,9 +874,9 @@ async def GetBotProps(chat: Chat):
             data = json.load(file)
         for role in data['systemRoles']:
             if str(role['id']) == botnum:
-                return botnum,role['name'],role['language'],role['lancode'],role['gender'],role['description'],role['fsmessage'],role['fsreply'],role['Temp']
+                return botnum,role['name'],role['language'],role['lancode'],role['gender'],role['description'],role['fsmessage'],role['fsreply'],role['Temp'],role['googlevoice']
     chat.send_text(f"*ERROR* New mode: 0 -  You are a helpful assistant")
-    return "0","NONE","English","en-US","male","You are a helpful assistant","Hi","Hello",0
+    return "0","NONE","English","en-US","male","You are a helpful assistant","Hi","Hello",0, "en-US-Standard-B"
 
 async def is_generator_online(session):
     try:
@@ -862,7 +889,7 @@ async def is_generator_online(session):
         return False
 
 async def get_weather(lang,city):
-    api_key = 'c9ba7ee19ced4c8ca8181040231805'
+    api_key = weather_api_key
     base_url = "http://api.weatherapi.com/v1/current.json"
 
 
@@ -935,7 +962,6 @@ def get_weather_replies_by_lang(lang):
 		"unit": " kmph"
     }
 
-
 def Interrogate_Image(image_file_path):
 
     client = vision.ImageAnnotatorClient()
@@ -949,10 +975,7 @@ def Interrogate_Image(image_file_path):
     'image': image,
     'features': [{'type_': vision.Feature.Type.LABEL_DETECTION}]
     })
-
-    print (str(response))
     return (str(response))
-
 
 def VisionToTable(content):
     blocks = content.split('label_annotations')
@@ -965,9 +988,8 @@ def VisionToTable(content):
             mystr= mystr+parse_block2(block)
 
     # Convert the list of dictionaries into a DataFrame
-    print (f"Deneme Str: {mystr}")
+    #print (f"Deneme Str: {mystr}")
     return(mystr)
-
 
 def parse_block2(block):
     """
@@ -997,8 +1019,62 @@ def parse_block2(block):
 
 #endregion
 
+#region Response Online Status to Amazon
+
+async def delhook():
+    try:
+        response = requests.post(
+            f'https://api.telegram.org/bot{API_KEY}/deleteWebhook')
+        print(response)
+        if response.status_code == 200:
+            myres= 'HOOK DELETED'
+        else:
+            myres = 'Something Wrong' + str(response)
+    except:
+        myres = '** HOOK NOT DELETED. MANUALLY DELETE FROM TELEGRAM. **'
+    return(myres)
+
+async def handle(request):
+    await delhook()                     #Not Working
+    return web.Response(text="OK")
+
+app = web.Application()
+app.router.add_get('/', handle)
+
+async def start_server():
+    print (await delhook())
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 9988)
+    await site.start()
+
+#endregion
+
+def sethook():
+    api_gateway_url = 'https://b7ixdjvznjpe65dkbidygmvhka0fcjap.lambda-url.us-east-1.on.aws/'
+    response = requests.post(
+        f'https://api.telegram.org/bot{API_KEY}/setWebhook',
+        params={'url': api_gateway_url}
+    )       
+    print (response.content)
+
+def send_Startup_message(user_id, message="Hello!"):
+    chat = Chat(bot, user_id)
+    chat.send_text(message)
+
+def cleanup():
+    # Your cleanup code or any other function you want to run
+    print("Adding WebHook to Telegram...")
+    try:
+        sethook()
+    except:
+        a1 = 1
+
+atexit.register(cleanup)
+
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(start_server())
+    send_Startup_message(876912333,"Monster STARTED")
     print ("READY.")
-    bot.run()
-
-
+    loop.run_until_complete(bot.run())
