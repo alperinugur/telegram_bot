@@ -20,7 +20,6 @@ import subprocess
 import asyncio
 import boto3
 import winsound
-import pc_command
 import requests
 import json
 from PIL import Image
@@ -46,7 +45,7 @@ def Get_Parameters():
     global GenImageReplyText, ImageGeneratorURL, ImageGeneratorAddress, ImageGenSystemRoleText
     global ImageGenUserRoleText, ImageGenUserRoleTextRandom, ImageGenDefault, ImageGenSkipThese
     global automatic1111_path, automatic1111_starter, async_bot_path, GOOGLE_APPLICATION_CREDENTIALS
-    global ChatGPTErrorReply, weather_api_key
+    global ChatGPTErrorReply, weather_api_key, AWS_Lambda_Webhook_URL, admin_Telegram_ID
 
     # Read parameters from JSON
     with open('_main/params.json', 'r') as f:
@@ -55,7 +54,9 @@ def Get_Parameters():
         print('** New Parameters Updating **')
         openai.api_key = paramsNew['openai_api_key']
         openai.organization = paramsNew['openai_organization']
+        AWS_Lambda_Webhook_URL = paramsNew ['AWS_Lambda_Webhook_URL']
         API_KEY = paramsNew['telegram_api_key']
+        admin_Telegram_ID = paramsNew['admin_Telegram_ID']
         weather_api_key = paramsNew['weather_api_key']
         DefaultTempForGPT = paramsNew['default_temp_for_gpt']
         DefaultTempImageGPT = paramsNew['default_temp_image_gpt']
@@ -418,7 +419,7 @@ async def ClearChatContents (chat: Chat):
 async def checkAuth(chat,match):
     user_name = getUserName(chat)
     user_id = chat.sender["id"]
-    if user_name == "duplicit" and user_id == 876912333:
+    if user_id == admin_Telegram_ID:
         return True
     else:
         print (user_name)
@@ -1045,16 +1046,15 @@ async def start_server():
     print (await delhook())
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 9988)
+    site = web.TCPSite(runner, '0.0.0.0', 9988)  # 
     await site.start()
 
 #endregion
 
 def sethook():
-    api_gateway_url = 'https://b7ixdjvznjpe65dkbidygmvhka0fcjap.lambda-url.us-east-1.on.aws/'
     response = requests.post(
         f'https://api.telegram.org/bot{API_KEY}/setWebhook',
-        params={'url': api_gateway_url}
+        params={'url': AWS_Lambda_Webhook_URL}
     )       
     print (response.content)
 
@@ -1075,6 +1075,6 @@ atexit.register(cleanup)
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.create_task(start_server())
-    send_Startup_message(876912333,"Monster STARTED")
+    send_Startup_message(admin_Telegram_ID,"BOT STARTED")
     print ("READY.")
     loop.run_until_complete(bot.run())

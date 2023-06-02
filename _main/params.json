@@ -1,8 +1,10 @@
 {
+	"admin_Telegram_ID" :12345678,
 	"openai_api_key": "sk-YOUR_OPEN_AI_API_KEY",
 	"openai_organization": "org-YOUR_OPEN_AI_ORGANIZATION_KEY",
 	"telegram_api_key": "Your Telegram API KEY",
 	"GOOGLE_APPLICATION_CREDENTIALS": "The full path to your google credentials file - it is a json file",
+	"AWS_Lambda_Webhook_URL" : "https://YourLambdaURL.lambda-url.us-east-1.on.aws/  if you want the bot to work on cloud -not Mandatory",
 	"weather_api_key": "Weather Application API KEY",
 	"async_bot_path" : "E:/AI/telegram_bot/ - full path of the telegram_bot",
 	"image_generator_url": "http://127.0.0.1:7860",
