@@ -13,6 +13,17 @@ Some features are:
  * Generate pictures (using Automatic1111 on your computer or any cloud platform)
  * You as admin, can also use the bot to remotely control your computer which is running the code
 
+## Minimum Requirements
+ * API Key from OPENAI (for bot to use ChatGPT API)
+ * API Key from telegram (to run the bot in telegram application)
+
+## Optional but Good to have
+ * Google API Key to process:
+   * Image Interrogation (send a photo and bot will use Google API and chatGPT to tell what is in the picture)
+   * Create voice replies if you send a voice message to bot
+ * API Key for Weather Application (to get weather info from the bot)
+ * Installation of Automatic1111 on your local machine or other environment (connection web address required)
+
 ## Before you begin
 **Why not take a look at how the bot is working, before installing**
 
