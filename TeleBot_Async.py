@@ -1067,7 +1067,7 @@ app.router.add_get('/', handle)
 
 #endregion
 
-atexit.register(cleanup)
+# atexit.register(cleanup)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
