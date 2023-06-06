@@ -33,6 +33,9 @@ import re
 import atexit
 import ctypes
 
+
+from asyncio.exceptions import TimeoutError     #TRYING
+
 #endregion
 
 # region Parameters
@@ -1066,6 +1069,17 @@ app = web.Application()
 app.router.add_get('/', handle)
 
 #endregion
+
+async def api_call_with_timeout(self, method, **params):        # TRYING TO PREVENT ERRORS
+    for i in range(20):
+        try:
+            print(f'{i} - TRYING')
+            return await self.api_call(method, **params)
+        except TimeoutError:
+            print(f'{i} - No SUCCESS- Will Try again')
+            await asyncio.sleep(2 ** i)  # Exponential backoff
+    raise RuntimeError(f"Maximum retries exceeded for method {method} with parameters {params}")
+
 
 # atexit.register(cleanup)
 
