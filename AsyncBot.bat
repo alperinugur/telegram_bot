@@ -1,8 +1,7 @@
 call venv\Scripts\activate 
 
+:loopstart
 python TeleBot_Async.py
+timeout /t 5
 
-timeout /t 10
-python TeleBot_Async.py
-timeout /t 20
-python TeleBot_Async.py
+goto loopstart
