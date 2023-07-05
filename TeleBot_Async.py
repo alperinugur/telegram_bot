@@ -230,7 +230,7 @@ async def select_bot(chat: Chat, match):
 @bot.command(r"^/(.+)")                      # / ile başlayan anlamsız komutlara cevap
 async def unknown(chat:Chat,match):
     await chat.reply ("No such command.")
-    with open('helptext.txt', 'r') as file:
+    with open('_main/helptext.txt', 'r') as file:
         helptext = file.read()
     await chat.send_text(helptext)
     makelog(chat,f'Unknown Command Tried: {match}',True)
