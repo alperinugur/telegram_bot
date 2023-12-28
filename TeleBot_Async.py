@@ -6,7 +6,7 @@ from PIL import Image
 import aiohttp
 from aiohttp import ClientSession
 from aiotg import Bot, Chat
-import openai
+from openai import OpenAI
 import os
 import datetime
 import cv2
@@ -43,20 +43,22 @@ from asyncio.exceptions import TimeoutError     #TRYING
 params= {}
 def Get_Parameters():
     global params
-    global openai, API_KEY
-    global DefaultTempForGPT, DefaultTempImageGPT, DefaultImageSteps, LogTextNameFixLength
+    global API_KEY 
+    global DefaultTempForGPT, DefaultTempImageGPT, DefaultImageSteps, LogTextNameFixLength, OpnAIApiKey, OpnAIOrgKey
     global GenImageReplyText, ImageGeneratorURL, ImageGeneratorAddress, ImageGenSystemRoleText
     global ImageGenUserRoleText, ImageGenUserRoleTextRandom, ImageGenDefault, ImageGenSkipThese
     global automatic1111_path, automatic1111_starter, async_bot_path, GOOGLE_APPLICATION_CREDENTIALS
-    global ChatGPTErrorReply, weather_api_key, AWS_Lambda_Webhook_URL, admin_Telegram_ID
+    global ChatGPTErrorReply, weather_api_key, AWS_Lambda_Webhook_URL, admin_Telegram_ID, image_generator_model_name
+    global image_generator_sampler_name
 
     # Read parameters from JSON
     with open('_main/params.json', 'r') as f:
         paramsNew = json.load(f)
     if params != paramsNew:
         print('** New Parameters Updating **')
-        openai.api_key = paramsNew['openai_api_key']
-        openai.organization = paramsNew['openai_organization']
+
+        OpnAIApiKey = paramsNew['openai_api_key']
+        OpnAIOrgKey = paramsNew['openai_organization']
         AWS_Lambda_Webhook_URL = paramsNew ['AWS_Lambda_Webhook_URL']
         API_KEY = paramsNew['telegram_api_key']
         admin_Telegram_ID = paramsNew['admin_Telegram_ID']
@@ -77,14 +79,17 @@ def Get_Parameters():
         automatic1111_path = paramsNew['automatic1111_path']
         automatic1111_starter = paramsNew['automatic1111_starter']
         async_bot_path = paramsNew['async_bot_path']
+        image_generator_model_name = paramsNew ['image_generator_model_name']
+        image_generator_sampler_name = paramsNew ['image_generator_sampler_name']
         GOOGLE_APPLICATION_CREDENTIALS = paramsNew['GOOGLE_APPLICATION_CREDENTIALS']
 Get_Parameters()
+
+client = OpenAI(api_key=OpnAIApiKey)    # update OPENAI new client system
 
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
 bot = Bot(api_token=API_KEY)
 
-# google_voice_list.list_voices()
 
 #endregion
 
@@ -169,7 +174,7 @@ async def gen_image(chat: Chat, match):
         st_pattern = re.compile(r"—st(\d+)")
         st_match = st_pattern.search(prompt)
         if st_match:
-            NumStep =  int(st_match.group(1)) if int(st_match.group(1))<26 else 25
+            NumStep =  int(st_match.group(1)) if int(st_match.group(1))<60 else 59
             
             GenPrompt = st_pattern.sub("", prompt).strip()
         else:
@@ -455,18 +460,19 @@ async def genimage(prompt, NumOfSteps, session, chat):
     payload = {
         "prompt": f"{prompt}",
         "steps": NumOfSteps,
-        "sampler_index": "DDIM"
+        "sampler_index": image_generator_sampler_name
     }
     
     option_payload = {
-        "sd_model_checkpoint": "chilloutmix_NiPrunedFp16Fix.safetensors [59ffe2243a]",
+        "sd_model_checkpoint": image_generator_model_name
     }
     try:
         async with session.post(url= f'{ImageGeneratorURL}/sdapi/v1/options', json=option_payload) as responseChangeCkpt:
             if responseChangeCkpt.status ==200:
-                print("Generating image using ChilloutMix model")
+                print("Generating image using Realistic Vision v6 model")
             else:
                 print(f"\nresponseChangeCkpt")
+                print (responseChangeCkpt.status)
     except Exception as e:
         print("Something went wrong: ",e)
         
@@ -494,7 +500,7 @@ async def genimage(prompt, NumOfSteps, session, chat):
                 # getusermessages (chat,'assistant',f'I have prepared a picture for you. Here I am sharing. {prompt}')
     except:
             generated = False
-            startretry = 25
+            startretry = 3
             chat.reply(text=f"Image Generator Offline. Trying to start up.")
             makelog(chat,"Image Generator Offline. Trying to start up.",True)
             os.chdir(automatic1111_path)
@@ -511,7 +517,7 @@ async def genimage(prompt, NumOfSteps, session, chat):
                     generated = True
                     break
                 else:
-                    await asyncio.sleep(5)  # Wait for 5 seconds before checking again
+                    await asyncio.sleep(15)  # Wait for 5 seconds before checking again
                     
             if not generated:
                 await chat.reply(text="Sorry. Could not start Image Generator..")
@@ -540,7 +546,8 @@ async def GetGenerativePrompt (chat):
     makelog (chat,f"Generation String:\n{combine4}",True)
 
     try:
-        response = openai.ChatCompletion.create(
+        #response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=combine4,
             max_tokens=1000,
@@ -591,9 +598,9 @@ async def get_cam_photo(chat):
     with open(capim_filename, 'rb') as f:
         await chat.send_photo (f)
     # Release the camera
-    cap.release()
+    # cap.release()
     # Close all OpenCV windows
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
     #makelog ....
 
@@ -622,7 +629,7 @@ async def teleVoiceFileToTxt(chat,file_url):
         #print (f"Bot Lang: {Botlanguage}")
 
     audio_file = open(mp3_filename, "rb")
-    transcript = openai.Audio.transcribe("whisper-1", audio_file).text
+    transcript = client.audio.transcriptions.create(model="whisper-1", file = audio_file).text
     return(transcript)
 
 async def download_file(url, local_filename):
@@ -648,15 +655,18 @@ async def chatGPT(chat: Chat, prompt):
     makelog (chat,prompt,False)
     # print (f"\r\n\r\nTOPLAM GIDEN :{combined}\r\n\r\n")
     try:
-        response = openai.ChatCompletion.create(
+        # response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=combined,
             max_tokens=1500,
             temperature = botTemp
         )
         print(str(combined))
-        ChatGPT_reply = response["choices"][0]["message"]["content"]
-        ln1,ln2,ln3 = response["usage"]["prompt_tokens"],response["usage"]["completion_tokens"],response["usage"]["total_tokens"]
+        print (response)
+        ChatGPT_reply = response.choices[0].message.content
+
+        ln1,ln2,ln3 = response.usage.prompt_tokens,response.usage.completion_tokens,response.usage.total_tokens
         tokeninfo = f" - [Tokens: {ln1}-{ln2}-{ln3}]"
         #tokeninfo = ""
         makelog (chat,ChatGPT_reply + tokeninfo,True)
@@ -694,14 +704,17 @@ async def chatGPTimageResult(chat:Chat, prompt):
     print (newline)
 
     try:
-        response = openai.ChatCompletion.create(
+        # response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=newline,
             max_tokens=1500,
             temperature = 0.1
         )
-        ChatGPT_reply = response["choices"][0]["message"]["content"]
-        ln1,ln2,ln3 = response["usage"]["prompt_tokens"],response["usage"]["completion_tokens"],response["usage"]["total_tokens"]
+        ChatGPT_reply = response.choices[0].message.content
+
+        ln1,ln2,ln3 = response.usage.prompt_tokens,response.usage.completion_tokens,response.usage.total_tokens
+
         tokeninfo = f" - [Tokens: {ln1}-{ln2}-{ln3}]"
         #tokeninfo = ""
         makelog (chat,ChatGPT_reply + tokeninfo,True)
