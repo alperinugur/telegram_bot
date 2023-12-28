@@ -546,14 +546,13 @@ async def GetGenerativePrompt (chat):
     makelog (chat,f"Generation String:\n{combine4}",True)
 
     try:
-        #response = openai.ChatCompletion.create(
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=combine4,
             max_tokens=1000,
             temperature = DefaultTempImageGPT
         )
-        ChatGPT_reply = response["choices"][0]["message"]["content"]
+        ChatGPT_reply = response.choices[0].message.content
     except:
         ChatGPT_reply = ImageGenDefault
 
