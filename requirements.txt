@@ -1,17 +1,20 @@
 # run this command to install all packages: pip install -r requirements.txt
 
+# if playsound gives error, you need to upgrade wheel:  pip install --upgrade wheel     
+
+
 python-telegram-bot==13.0
-openai
-moviepy
-aiohttp
-aiotg
-boto3
-opencv-python-headless
-Pillow
-playsound
-pydub
-google-cloud-vision
-pandas
-requests
-emoji
-google-cloud-texttospeech
+openai==1.6.1
+moviepy==1.0.3
+aiohttp==3.9.1
+aiotg==2.0.0
+boto3==1.34.8
+opencv-python-headless==4.8.1.78
+Pillow==10.1.0
+playsound==1.3.0
+pydub==0.25.1
+google-cloud-vision==3.5.0
+pandas==2.1.4
+requests==2.31.0
+emoji==2.9.0
+google-cloud-texttospeech==2.15.0
