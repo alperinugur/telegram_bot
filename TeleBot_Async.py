@@ -32,6 +32,7 @@ from aiohttp import web
 import re
 import atexit
 import ctypes
+from termcolor import colored  
 
 
 from asyncio.exceptions import TimeoutError     #TRYING
@@ -100,11 +101,11 @@ async def tele_weather (chat: Chat, match):
     try:
         BotPrps = await GetBotProps(chat)
         langname = BotPrps[2]
-        ReplyText=[]
-        ReplyText = get_weather_replies_by_lang(langname)
-
         remainder = match.group(2)  # get the remaining string
+
         if remainder is not None:
+            ReplyText=[]
+            ReplyText = get_weather_replies_by_lang(langname)
             #print (f"Match: {remainder}")
             weather,image = await get_weather(langname,remainder)
             image = image.convert("RGBA")
@@ -245,7 +246,8 @@ async def text_input(chat: Chat, match):
     prompt = match.group(1)
     prompt = re.sub(r'\n+', '\\n', prompt)  # remove extra newlines
     answer = await chatGPT(chat, prompt)
-    await chat.send_text(answer)
+    if answer:
+        await chat.send_text(answer)
 
 @bot.handle("photo")                        # fotoğraf yüklenirse
 async def tele_photo(chat:Chat,photo):
@@ -641,6 +643,17 @@ async def download_file(url, local_filename):
                         break
                     file.write(chunk)
 
+
+class MockMatch:
+    def __init__(self, group2):
+        self.group2 = group2
+
+    def group(self, index):
+        if index == 2:
+            return self.group2
+        return None
+
+
 async def chatGPT(chat: Chat, prompt):
     winsound.Beep(1440, 25)
     Get_Parameters()
@@ -653,24 +666,81 @@ async def chatGPT(chat: Chat, prompt):
 
     makelog (chat,prompt,False)
     # print (f"\r\n\r\nTOPLAM GIDEN :{combined}\r\n\r\n")
+
+
+    function_selector_fn = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city name, e.g. Istanbul. Default to Istanbul if not defined. Make sure it is a city name or default to Istanbul",
+                            }
+                        },  
+                        "required": ["location"]
+                    }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "generate_image",
+                "description": "Generate an image",
+                "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "image_prompt": {
+                                "type": "string",
+                                "description": "The prompt for generating an image.",
+                            }
+                        },  
+                        "required": []
+                }
+            }
+        }
+    ]
+
+
     try:
         # response = openai.ChatCompletion.create(
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=combined,
+            tools = function_selector_fn,
             max_tokens=1500,
             temperature = botTemp
         )
-        print(str(combined))
-        print (response)
-        ChatGPT_reply = response.choices[0].message.content
-
-        ln1,ln2,ln3 = response.usage.prompt_tokens,response.usage.completion_tokens,response.usage.total_tokens
-        tokeninfo = f" - [Tokens: {ln1}-{ln2}-{ln3}]"
-        #tokeninfo = ""
-        makelog (chat,ChatGPT_reply + tokeninfo,True)
-        getusermessages(chat,"assistant",ChatGPT_reply)
-        return (f"{ChatGPT_reply}")
+        print(str(combined),"\n\n")
+        print (response,"\n")
+        assistant_message = response.choices[0].message.tool_calls
+        if assistant_message:
+            print (assistant_message)
+            fnargs = json.loads(assistant_message[0].function.arguments)
+            fn_Name=  assistant_message[0].function.name
+            if fn_Name == "get_current_weather":
+                ppp = fnargs["location"]
+                await tele_weather ( chat ,  MockMatch(ppp))
+                return ()
+            elif fn_Name == "generate_image":
+                if fnargs["image_prompt"]:
+                    ppp = fnargs["image_prompt"]
+                else:
+                    ppp = ""
+                await gen_image (chat, MockMatch(ppp))
+                return ()
+        else:
+            ChatGPT_reply = response.choices[0].message.content
+            ln1,ln2,ln3 = response.usage.prompt_tokens,response.usage.completion_tokens,response.usage.total_tokens
+            tokeninfo = f" - [Tokens: {ln1}-{ln2}-{ln3}]"
+            #tokeninfo = ""
+            makelog (chat,ChatGPT_reply + tokeninfo,True)
+            getusermessages(chat,"assistant",ChatGPT_reply)
+            return (f"{ChatGPT_reply}")
     except Exception as e:
         print (f"Exception:\n{e}\n")
 
@@ -1081,16 +1151,6 @@ app = web.Application()
 app.router.add_get('/', handle)
 
 #endregion
-
-async def api_call_with_timeout(self, method, **params):        # TRYING TO PREVENT ERRORS
-    for i in range(20):
-        try:
-            print(f'{i} - TRYING')
-            return await self.api_call(method, **params)
-        except TimeoutError:
-            print(f'{i} - No SUCCESS- Will Try again')
-            await asyncio.sleep(2 ** i)  # Exponential backoff
-    raise RuntimeError(f"Maximum retries exceeded for method {method} with parameters {params}")
 
 
 # atexit.register(cleanup)
