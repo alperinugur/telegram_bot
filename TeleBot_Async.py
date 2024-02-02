@@ -241,11 +241,29 @@ async def unknown(chat:Chat,match):
     await chat.send_text(helptext)
     makelog(chat,f'Unknown Command Tried: {match}',True)
 
+@bot.handle("sticker")                      # Handle the stickers
+async def sticker_handle(chat:Chat,sticker):
+    time = datetime.datetime.now().strftime("%y-%m-%d_%H_%M_%S")
+    user_name = getUserName(chat)
+    user_id = chat.sender["id"]
+    myemoji = (sticker["emoji"])
+    myemojidesc = (describe_emoji (myemoji))
+    chat.send_text (myemoji)
+    makelog(chat,f"Emoji: {myemoji} {myemojidesc}", False)
+    getusermessages (chat,"user", f"{myemoji} {myemojidesc}" )
+    makelog(chat,f"Emoji: {myemoji} {myemojidesc}",True)
+    getusermessages (chat,"assistant",f"{myemoji} {myemojidesc}" )
+    
 @bot.command(r"(?s)(.+)")                   # Normal Chat Mode'u
 async def text_input(chat: Chat, match):
     prompt = match.group(1)
     prompt = re.sub(r'\n+', '\\n', prompt)  # remove extra newlines
-    answer = await chatGPT(chat, prompt)
+    code_point = ord(prompt[0])
+    print(code_point)
+    if code_point >= 0x10000:  # Check for code points beyond the Basic Multilingual Plane
+        answer = prompt[0] + ' ' + await chatGPT(chat, prompt)
+    else:
+        answer = await chatGPT(chat, prompt)
     if answer:
         await chat.send_text(answer)
 
@@ -283,18 +301,7 @@ async def tele_photo(chat:Chat,photo):
 
     #chat.send_text(text=f"Picture? Why??")
 
-@bot.handle("sticker")                      # Handle the stickers
-async def sticker_handle(chat:Chat,sticker):
-    time = datetime.datetime.now().strftime("%y-%m-%d_%H_%M_%S")
-    user_name = getUserName(chat)
-    user_id = chat.sender["id"]
-    myemoji = (sticker["emoji"])
-    myemojidesc = (describe_emoji (myemoji))
-    chat.send_text (myemoji)
-    makelog(chat,f"Emoji: {myemoji} {myemojidesc}", False)
-    getusermessages (chat,"user", f"{myemoji} {myemojidesc}" )
-    makelog(chat,f"Emoji: {myemoji} {myemojidesc}",True)
-    getusermessages (chat,"assistant",f"{myemoji} {myemojidesc}" )
+
 
 @bot.handle("voice")                        # VOICE COMMANDS
 async def voice_handler(chat: Chat, voice):
