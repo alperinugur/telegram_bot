@@ -53,7 +53,7 @@ def Get_Parameters():
     global image_generator_sampler_name
 
     # Read parameters from JSON
-    with open('_main/params.json', 'r') as f:
+    with open('_main/.params.json', 'r') as f:
         paramsNew = json.load(f)
     if params != paramsNew:
         print('** New Parameters Updating **')
